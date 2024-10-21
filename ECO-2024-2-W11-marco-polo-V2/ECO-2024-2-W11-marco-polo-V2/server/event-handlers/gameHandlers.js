@@ -67,7 +67,6 @@ const getWinnerDataHandler = (socket, db) => {
 	};
 };
 
-
 //modificado para manejar los puntajes
 const onSelectPoloHandler = (socket, db, io) => {
 	return (userID) => {
@@ -129,6 +128,50 @@ const onSelectPoloHandler = (socket, db, io) => {
 	};
 };
 
+const restartGameHandler = (socket, db, io) => {
+	return () => {
+		// Buscar un jugador que tenga una puntuación mayor o igual a 100
+		const winner = db.players.find((player) => player.score >= 100);
+
+		// Si no hay ganador, simplemente reiniciar el juego asignando roles
+		if (!winner) {
+			// Llamar a startGameHandler para reiniciar el juego
+			return startGameHandler(socket, db, io)();
+		}
+
+		// Verificamos si el jugador que ganó es "marco"
+		if (winner.role === 'marco') {
+			// Reiniciar las puntuaciones de todos los jugadores
+			db.players.forEach((player) => {
+				player.score = 0; // Reiniciar el puntaje a 0
+			});
+
+			// Emitir un evento a todos los jugadores que el juego ha sido reiniciado
+			io.emit('gameRestarted', {
+				message: 'El juego ha sido reiniciado. ¡Buena suerte a todos!',
+				players: db.players.map((player) => ({
+					name: player.nickname,
+					score: player.score,
+				})),
+			});
+
+			// Reiniciar el juego asignando roles nuevamente
+			db.players = assignRoles(db.players);
+
+			// Notificar a cada jugador que el juego ha comenzado
+			db.players.forEach((element) => {
+				io.to(element.id).emit('startGame', element.role);
+			});
+		} else {
+			// Si no es "marco", solo reiniciar el juego asignando roles
+			db.players = assignRoles(db.players);
+			db.players.forEach((element) => {
+				io.to(element.id).emit('startGame', element.role);
+			});
+		}
+	};
+};
+
 module.exports = {
 	joinGameHandler,
 	startGameHandler,
@@ -136,4 +179,5 @@ module.exports = {
 	notifyPoloHandler,
 	onSelectPoloHandler,
 	getWinnerDataHandler,
+	restartGameHandler,
 };

@@ -58,4 +58,9 @@ export default function renderScreen2() {
 		playersListElement.innerHTML = '';
 		playersItems.forEach((item) => playersListElement.appendChild(item));
 	});
+
+	socket.on('gameRestarted', (data) => {
+		console.log(data.message); // Mensaje de reinicio
+		router.navigateTo('/');
+	});
 }
