@@ -2,43 +2,33 @@ import { socket, router } from '../routes.js';
 
 export default function renderScreen2() {
 	const app = document.getElementById('app');
-	let winner = '';
-	let players = [];
+	app.innerHTML = `
+    <h1>¡Tenemos un ganador!</h1>
+    <p id="winnerMessage"></p>
+    <h2>Posiciones finales</h2>
+    <ul id="finalPlayers"></ul>
+  `;
 
-	function renderWinnerScreen() {
-		if (winner && players.length > 0) {
-			app.innerHTML = `
-                <h1>¡Tenemos un ganador!</h1>
-                <p id="winnerMessage">¡El ganador es ${winner}!</p>
-                <h2>Posiciones finales</h2>
-                <ul id="finalPlayers"></ul>
-            `;
+	// Solicitar datos del ganador y los jugadores al servidor si no se reciben inicialmente
+	socket.emit('getWinnerData');
 
-			players.sort((a, b) => b.score - a.score);
-
-			let playersList = '';
-			players.forEach((player, index) => {
-				playersList += `<li>${index + 1}. ${player.name} (${player.score} pts)</li>`;
-			});
-
-			document.getElementById('finalPlayers').innerHTML = playersList;
-		} else {
-			console.log('Esperando datos del ganador y jugadores.');
-		}
-	}
-
-	app.innerHTML = '<p>Cargando resultados...</p>';
-
-	//socket.emit('getWinnerData');
-
+	// Escuchar el evento 'announceWinner' para recibir los datos del ganador y jugadores
 	socket.on('announceWinner', (data) => {
-		console.log('Datos recibidos en Screen2:', data); // Verificar datos
-		if (data && data.winner) {
-			winner = data.winner;
-			players = data.players;
-			renderWinnerScreen();
-		} else {
-			console.log('No se recibieron datos del ganador o no hay un ganador.');
-		}
+		const { winner, players } = data;
+
+		// Mostrar el mensaje del ganador
+		document.getElementById('winnerMessage').textContent = `¡El ganador es ${winner}!`;
+
+		// Ordenar los jugadores por puntuación de mayor a menor
+		players.sort((a, b) => b.score - a.score);
+
+		// Crear la lista de posiciones con los jugadores
+		let playersList = '';
+		players.forEach((player, index) => {
+			playersList += `<li>${index + 1}. ${player.name} (${player.score} pts)</li>`;
+		});
+
+		// Renderizar la lista de jugadores en el HTML
+		document.getElementById('finalPlayers').innerHTML = playersList;
 	});
 }

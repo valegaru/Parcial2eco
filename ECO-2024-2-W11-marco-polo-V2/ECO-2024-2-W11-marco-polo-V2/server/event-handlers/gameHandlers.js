@@ -47,14 +47,35 @@ const notifyPoloHandler = (socket, db, io) => {
 		});
 	};
 };
+
 //para almacenar al ganador al pasarselo a las screen 2
 let lastWinner = null;
+
+// Nuevo evento para manejar cuando el cliente results al pasar de screen solicita los datos del ganador
+const getWinnerDataHandler = (socket, db) => {
+	return () => {
+		// Si ya hay un ganador previo, enviarlo al cliente, debe de haber porque asi se pasa de screen
+		if (lastWinner) {
+			socket.emit('announceWinner', {
+				winner: lastWinner.nickname,
+				players: db.players.map((player) => ({
+					name: player.nickname,
+					score: player.score,
+				})),
+			});
+		}
+	};
+};
+
+
 //modificado para manejar los puntajes
 const onSelectPoloHandler = (socket, db, io) => {
 	return (userID) => {
 		const marcoPlayer = db.players.find((user) => user.id === socket.id);
 		const poloSelected = db.players.find((user) => user.id === userID);
-    const poloEspecial = db.players.find((user) => user.role === 'polo-especial');
+		const poloEspecial = db.players.find((user) => user.role === 'polo-especial');
+
+		//if (!gameActive) return; // Si el juego no está activo, no hacer nada
 
 		if (poloSelected.role === 'polo-especial') {
 			// Marco atrapó al polo especial, suma puntos. Y resta puntos al polo especial
@@ -71,10 +92,10 @@ const onSelectPoloHandler = (socket, db, io) => {
 			// Marco no atrapó al polo especial, se resta puntos.
 			marcoPlayer.score -= 10;
 
-        // Si el polo especial no es seleccionado, gana 10 puntos
-        if (poloEspecial) {
-          poloEspecial.score += 10;
-        }
+			// Si el polo especial no es seleccionado, gana 10 puntos
+			if (poloEspecial) {
+				poloEspecial.score += 10;
+			}
 
 			// Notify all players that the game is over and update scores
 			db.players.forEach((element) => {
@@ -95,6 +116,7 @@ const onSelectPoloHandler = (socket, db, io) => {
 		// Si alguno llega a 100 puntos, anunciar el ganador
 		const winner = db.players.find((player) => player.score >= 100);
 		if (winner) {
+			lastWinner = winner;
 			console.log('Winner:', winner);
 			io.emit('announceWinner', {
 				winner: winner.nickname,
@@ -113,4 +135,5 @@ module.exports = {
 	notifyMarcoHandler,
 	notifyPoloHandler,
 	onSelectPoloHandler,
+	getWinnerDataHandler,
 };
