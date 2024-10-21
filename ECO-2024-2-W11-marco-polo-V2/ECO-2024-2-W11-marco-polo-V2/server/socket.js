@@ -1,26 +1,33 @@
-const { Server } = require("socket.io")
-const { handleEvents } = require("./events")
+const { Server } = require('socket.io');
+const { handleEvents } = require('./events');
+const db = require('./db/index');
 
-let io
+let io;
 
 const initSocket = (httpServer) => {
-  io = new Server(httpServer, {
-    path: "/real-time",
-    cors: {
-      origin: "*", // Allow requests from any origin
-    },
-  }) // Creates a WebSocket server, using the same HTTP server as the Express app and listening on the /real-time path
+	io = new Server(httpServer, {
+		path: '/real-time',
+		cors: {
+			origin: '*', // Allow requests from any origin
+		},
+	}); // Creates a WebSocket server, using the same HTTP server as the Express app and listening on the /real-time path
 
-  io.on("connection", (socket) => {
-    handleEvents(socket, io)
-  })
-}
+	io.on('connection', (socket) => {
+		handleEvents(socket, io);
+		socket.emit('initialPlayers', {
+			players: db.players.map((player) => ({
+				name: player.nickname,
+				score: player.score,
+			})),
+		});
+	});
+};
 
 const getIO = () => {
-  if (!io) {
-    throw new Error("Socket.io not initialized!")
-  }
-  return io
-}
+	if (!io) {
+		throw new Error('Socket.io not initialized!');
+	}
+	return io;
+};
 
-module.exports = { initSocket, getIO }
+module.exports = { initSocket, getIO };
