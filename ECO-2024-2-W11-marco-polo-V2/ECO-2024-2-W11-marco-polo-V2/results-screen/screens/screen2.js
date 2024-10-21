@@ -3,11 +3,13 @@ import { socket, router } from '../routes.js';
 export default function renderScreen2() {
 	const app = document.getElementById('app');
 	app.innerHTML = `
-    <h1>¡Tenemos un ganador!</h1>
+    <h1>There is a winner!</h1>
     <p id="winnerMessage"></p>
-    <h2>Posiciones finales</h2>
+		<div id="container">
+    <h2>Final Ranking</h2>
     <ul id="finalPlayers"></ul>
-    <button id="sortAlphabeticallyBtn">Ordenar alfabéticamente</button>
+    <button id="sortAlphabeticallyBtn">Sort Alphabetically</button>
+		</div>
   `;
 
 	// Solicitar datos del ganador y los jugadores al servidor si no se reciben inicialmente
@@ -18,7 +20,7 @@ export default function renderScreen2() {
 		const { winner, players } = data;
 
 		// Mostrar el mensaje del ganador
-		document.getElementById('winnerMessage').textContent = `¡El ganador es ${winner}!`;
+		document.getElementById('winnerMessage').textContent = `The winner is ${winner}!`;
 
 		// Ordenar los jugadores por puntuación de mayor a menor y renderizarlos
 		renderPlayers(players);

@@ -3,8 +3,9 @@ import { socket, router } from '../routes.js';
 export default function renderScreen1() {
 	const app = document.getElementById('app');
 	app.innerHTML = `
-    <h1>Score</h1>
-    <ul id="players"></ul>
+    <h1>Scores</h1>
+		<div id="container"><ul id="players"></ul></div>
+
   `;
 
 	// Escuchar las puntuaciones iniciales de los jugadores
