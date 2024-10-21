@@ -88,7 +88,7 @@ const restartButton = document.getElementById('restart-button');
 restartButton.addEventListener('click', restartGame);
 
 async function restartGame() {
-	socket.emit('restartGame'); // Notifica al servidor que se reinicie el juego
+	socket.emit('restartGame'); // Notifica al servidor que se reinicie el juego en funcion de si marco gana o no
 }
 
 // ------------- SOCKET LISTENERS ----------------

@@ -12,14 +12,14 @@ export default function renderScreen2() {
 		</div>
   `;
 
-	// Solicitar datos del ganador y los jugadores al servidor si no se reciben inicialmente
+	// Solicitar datos del ganador y los jugadores al servidor
 	socket.emit('getWinnerData');
 
 	// Escuchar el evento 'announceWinner' para recibir los datos del ganador y jugadores
 	socket.on('announceWinner', (data) => {
 		const { winner, players } = data;
 
-		// Mostrar el mensaje del ganador
+		// Mostrar el mensaje del ganador en la screen
 		document.getElementById('winnerMessage').textContent = `The winner is ${winner}!`;
 
 		// Ordenar los jugadores por puntuación de mayor a menor y renderizarlos
@@ -60,7 +60,7 @@ export default function renderScreen2() {
 	});
 
 	socket.on('gameRestarted', (data) => {
-		console.log(data.message); // Mensaje de reinicio
+		console.log(data.message);
 		router.navigateTo('/');
 	});
 }

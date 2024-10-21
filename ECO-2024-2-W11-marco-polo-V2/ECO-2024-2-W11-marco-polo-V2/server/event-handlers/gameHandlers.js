@@ -54,10 +54,11 @@ let lastWinner = null;
 // Nuevo evento para manejar cuando el cliente results al pasar de screen solicita los datos del ganador
 const getWinnerDataHandler = (socket, db) => {
 	return () => {
-		// Si ya hay un ganador previo, enviarlo al cliente, debe de haber porque asi se pasa de screen
+		// Si ya hay un ganador previo, enviarlo al cliente. Debe de haber porque asi se pasa de screen. Primero se ejecuta onSelectPoloHandler
 		if (lastWinner) {
 			socket.emit('announceWinner', {
 				winner: lastWinner.nickname,
+				//se mandan tmabien todos los jugadores con su score
 				players: db.players.map((player) => ({
 					name: player.nickname,
 					score: player.score,
@@ -74,7 +75,6 @@ const onSelectPoloHandler = (socket, db, io) => {
 		const poloSelected = db.players.find((user) => user.id === userID);
 		const poloEspecial = db.players.find((user) => user.role === 'polo-especial');
 
-		//if (!gameActive) return; // Si el juego no está activo, no hacer nada
 
 		if (poloSelected.role === 'polo-especial') {
 			// Marco atrapó al polo especial, suma puntos. Y resta puntos al polo especial
@@ -112,13 +112,14 @@ const onSelectPoloHandler = (socket, db, io) => {
 			})),
 		});
 
-		// Si alguno llega a 100 puntos, anunciar el ganador
+		// Si alguno llega a 100 puntos, hay un ganador. Si hay un ganador, anunciar al ganador.
 		const winner = db.players.find((player) => player.score >= 100);
 		if (winner) {
 			lastWinner = winner;
 			console.log('Winner:', winner);
 			io.emit('announceWinner', {
 				winner: winner.nickname,
+				//tambien se envian los todos los jugadores y su puntaje
 				players: db.players.map((player) => ({
 					name: player.nickname,
 					score: player.score,
@@ -128,12 +129,13 @@ const onSelectPoloHandler = (socket, db, io) => {
 	};
 };
 
+//ocurre al oprimir restartGame
 const restartGameHandler = (socket, db, io) => {
 	return () => {
-		// Buscar un jugador que tenga una puntuación mayor o igual a 100
+		// Buscar un jugador que tenga una puntuación mayor o igual a 100, es el ganador
 		const winner = db.players.find((player) => player.score >= 100);
 
-		// Si no hay ganador, simplemente reiniciar el juego asignando roles
+		// Si no hay ganador, simplemente reiniciar el juego asignando roles, con startGame
 		if (!winner) {
 			// Llamar a startGameHandler para reiniciar el juego
 			return startGameHandler(socket, db, io)();
