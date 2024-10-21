@@ -1,4 +1,4 @@
-import { socket } from '../routes.js';
+import { socket, router } from '../routes.js';
 
 export default function renderScreen2() {
 	const app = document.getElementById('app');

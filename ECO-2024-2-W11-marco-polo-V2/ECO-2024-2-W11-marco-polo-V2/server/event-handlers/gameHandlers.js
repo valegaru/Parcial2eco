@@ -94,6 +94,7 @@ const onSelectPoloHandler = (socket, db, io) => {
 		// Si alguno llega a 100 puntos, anunciar el ganador
 		const winner = db.players.find((player) => player.score >= 100);
 		if (winner) {
+			console.log('Winner:', winner);
 			io.emit('announceWinner', {
 				winner: winner.nickname,
 				players: db.players.map((player) => ({
