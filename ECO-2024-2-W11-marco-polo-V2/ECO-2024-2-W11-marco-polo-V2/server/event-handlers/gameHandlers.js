@@ -47,7 +47,8 @@ const notifyPoloHandler = (socket, db, io) => {
 		});
 	};
 };
-
+//para almacenar al ganador al pasarselo a las screen 2
+let lastWinner = null;
 //modificado para manejar los puntajes
 const onSelectPoloHandler = (socket, db, io) => {
 	return (userID) => {

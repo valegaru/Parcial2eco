@@ -2,27 +2,43 @@ import { socket, router } from '../routes.js';
 
 export default function renderScreen2() {
 	const app = document.getElementById('app');
-	app.innerHTML = `
-    <h1>Winner</h1>
-    <div id="winner"></div>
-  `;
+	let winner = '';
+	let players = [];
 
-	// Escuchar el evento de anuncio de ganador
+	function renderWinnerScreen() {
+		if (winner && players.length > 0) {
+			app.innerHTML = `
+                <h1>¡Tenemos un ganador!</h1>
+                <p id="winnerMessage">¡El ganador es ${winner}!</p>
+                <h2>Posiciones finales</h2>
+                <ul id="finalPlayers"></ul>
+            `;
+
+			players.sort((a, b) => b.score - a.score);
+
+			let playersList = '';
+			players.forEach((player, index) => {
+				playersList += `<li>${index + 1}. ${player.name} (${player.score} pts)</li>`;
+			});
+
+			document.getElementById('finalPlayers').innerHTML = playersList;
+		} else {
+			console.log('Esperando datos del ganador y jugadores.');
+		}
+	}
+
+	app.innerHTML = '<p>Cargando resultados...</p>';
+
+	//socket.emit('getWinnerData');
+
 	socket.on('announceWinner', (data) => {
-		const { winner, players } = data;
-
-		// Ordenar jugadores por puntuación descendente
-		const sortedPlayers = players.sort((a, b) => b.score - a.score);
-
-		// Mostrar el ganador y la lista ordenada
-		let resultHTML = `<h2>¡Ganador: ${winner}!</h2>`;
-		resultHTML += '<ul>';
-
-		sortedPlayers.forEach((player, index) => {
-			resultHTML += `<li>${index + 1}. ${player.name} (${player.score} pts)</li>`;
-		});
-
-		resultHTML += '</ul>';
-		document.getElementById('winner').innerHTML = resultHTML;
+		console.log('Datos recibidos en Screen2:', data); // Verificar datos
+		if (data && data.winner) {
+			winner = data.winner;
+			players = data.players;
+			renderWinnerScreen();
+		} else {
+			console.log('No se recibieron datos del ganador o no hay un ganador.');
+		}
 	});
 }

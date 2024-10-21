@@ -35,5 +35,6 @@ export default function renderScreen1() {
 	socket.on('announceWinner', (data) => {
 		console.log('Winner announced:', data.winner);
 		router.navigateTo('/screen2'); // Redirigir a la pantalla 2
+		socket.emit('getWinnerData');
 	});
 }
