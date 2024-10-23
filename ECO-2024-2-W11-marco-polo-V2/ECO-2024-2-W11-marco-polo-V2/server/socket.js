@@ -14,13 +14,6 @@ const initSocket = (httpServer) => {
 
 	io.on('connection', (socket) => {
 		handleEvents(socket, io);
-		//para que aparezcan los jugadores con el score incluso si est[a en 0 al inicio
-		socket.emit('initialPlayers', {
-			players: db.players.map((player) => ({
-				name: player.nickname,
-				score: player.score,
-			})),
-		});
 	});
 };
 
